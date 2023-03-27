@@ -24,10 +24,7 @@ module.exports = {
   },
   rules: {
     'prettier/prettier': 'error',
-    'no-console':
-      process.env.NODE_ENV === 'production'
-        ? ['warn', { allow: ['warn', 'error'] }]
-        : 'off',
+    'no-console': process.env.NODE_ENV === 'production' ? ['warn', { allow: ['warn', 'error'] }] : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+logs/
+.env
+.env.*
+!.env.example
+!.env.*.example
+.vite/
+*.tsbuildinfo
+.trellis/.runtime/
+.trellis/.developer

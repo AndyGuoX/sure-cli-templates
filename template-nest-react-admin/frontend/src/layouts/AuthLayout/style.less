@@ -1,0 +1,14 @@
+/* 登录前的壳：居中 + 一张装饰底图（三段叠加渐变）。
+   它是装饰底图而不是语义色，所以不走 antd token。 */
+.auth-wrap {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background:
+    radial-gradient(circle at 8% 8%, #2866ff29, #0000 26rem),
+    radial-gradient(circle at 90% 16%, #16c8db2e, #0000 24rem),
+    linear-gradient(135deg, #f6f9ff 0%, #eef4ff 46%, #f8fbff 100%);
+}

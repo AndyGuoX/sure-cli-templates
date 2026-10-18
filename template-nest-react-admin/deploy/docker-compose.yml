@@ -1,0 +1,97 @@
+# 生产编排：postgres + 一次性迁移 + api + nginx
+# 使用：cp .env.example .env（填值），然后 docker compose up -d --build
+name: nest-react-admin
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: nest-react-admin-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-app}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+    # 生产不对外暴露 5432：只有同网络的 api / migrate 需要连它。
+    # ⚠️ 这里**不能** cap_drop ALL / no-new-privileges：官方 postgres 镜像的入口需要
+    # chown + setuid 切到 postgres 用户，丢了这些能力容器会反复重启（实测）。
+
+  # 迁移只跑一次（成功退出）。api 等它完成后再启动 —— 多副本同时跑 DDL 会互相争锁。
+  migrate:
+    build: ../backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-app}
+    command: ["node", "./node_modules/typeorm/cli.js", "migration:run", "-d", "dist/database/data-source.js"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build: ../backend
+    container_name: nest-react-admin-api
+    env_file: .env
+    environment:
+      PORT: 3100
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-app}
+      # LOG_SERVICE 必须写在每个服务自己的 environment 里，不能放共享 .env：
+      # 两个进程写同一个文件会互相覆盖，而且它还是归档/清理车道的隔离键。
+      LOG_SERVICE: api
+      LOG_DIR: /app/logs
+      LOG_TO_FILE: ${LOG_TO_FILE:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_RETENTION_DAYS: ${LOG_RETENTION_DAYS:-7}
+      LOG_ERROR_FILE: ${LOG_ERROR_FILE:-true}
+      NODE_OPTIONS: --max-old-space-size=768
+    volumes:
+      # 日志落盘到宿主机：容器重建不会把当天日志带走。
+      # ⚠️ 容器以 node（uid 1000）运行：宿主目录要 chown 1000:1000，否则写不进去
+      # （不会崩 —— file sink 会降级为只走 stdout）。
+      - /data/nest-react-admin/logs:/app/logs:z
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      # alpine 镜像没有 curl，用 node 自带的 http 模块。健康检查会真的打一次数据库。
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3100/api/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 3s
+      retries: 6
+      start_period: 30s
+    restart: unless-stopped
+    stop_grace_period: 30s
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 1g
+    pids_limit: 200
+
+  nginx:
+    build: ../frontend
+    container_name: nest-react-admin-nginx
+    ports: ["8000:80"]
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/proxy_params.inc:/etc/nginx/conf.d/proxy_params.inc:ro
+    depends_on: [api]
+    restart: unless-stopped
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID, NET_BIND_SERVICE]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 256m
+    pids_limit: 200
+
+volumes:
+  pgdata:

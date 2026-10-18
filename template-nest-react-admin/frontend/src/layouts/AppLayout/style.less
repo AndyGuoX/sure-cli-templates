@@ -1,0 +1,93 @@
+/* 登录后的壳：Sider 导航 + 顶栏用户区 + 内容区。
+   ⚠️ 边框色是字面值 —— 与 src/App.tsx 里 ConfigProvider 的 colorBorder / colorBorderSecondary
+   是同一个值。antd v6 没开 CSS 变量模式，token 在 .less 里拿不到；换主题时两处一起改。 */
+.app-shell {
+  height: 100vh;
+  overflow: hidden;
+
+  .app-sider {
+    border-inline-end: 1px solid #e8ebf0;
+  }
+
+  .app-sider-inner {
+    height: 100%;
+  }
+
+  .app-brand {
+    height: 60px;
+    padding-inline: 20px;
+    border-bottom: 1px solid #f0f2f5;
+    white-space: nowrap;
+    overflow: hidden;
+
+    .app-brand-name {
+      font-size: 13px;
+    }
+  }
+
+  .app-menu {
+    padding-top: 16px;
+    border-inline-end: none;
+  }
+
+  .app-header {
+    height: 60px;
+    line-height: 1.5;
+    padding-inline: 16px 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #e8ebf0;
+
+    .app-collapse-btn {
+      flex: none;
+    }
+
+    .app-header-title {
+      font-size: 13px;
+      font-weight: 500;
+    }
+  }
+
+  .app-header-user {
+    margin-inline-start: auto;
+  }
+
+  .app-user-btn {
+    height: auto;
+    padding: 4px 8px;
+  }
+
+  /* 头像底色 = colorPrimaryBg，字色 = colorPrimary（字面值，理由同文件头） */
+  .app-user-avatar {
+    background: #e6f4ff;
+    color: #1677ff;
+  }
+
+  /* 下拉箭头是装饰，不该和用户名抢注意力 */
+  .app-user-caret {
+    font-size: 10px;
+    color: rgba(31, 39, 51, 0.45);
+  }
+
+  .app-content {
+    padding: 16px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 页面底座：靠底色 + 边框两层从灰底上立起来 */
+  .app-page {
+    flex: 1;
+    background: #ffffff;
+    border: 1px solid #e8ebf0;
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  /* 白卡上的卡片：antd 默认外框色在白卡上几乎看不见，补回 --line */
+  .app-page .ant-card-bordered {
+    border-color: #e8ebf0;
+  }
+}

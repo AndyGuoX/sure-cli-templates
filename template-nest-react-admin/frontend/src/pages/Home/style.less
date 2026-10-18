@@ -1,0 +1,61 @@
+.home-page {
+  max-width: 1080px;
+
+  .home-time {
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .home-alert {
+    margin-bottom: 16px;
+  }
+
+  .home-status-card {
+    height: 100%;
+
+    .home-status-icon {
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: #e6f4ff; /* = colorPrimaryBg */
+      color: #1677ff; /* = colorPrimary */
+      font-size: 18px;
+    }
+
+    .home-status-body {
+      min-width: 0;
+    }
+
+    .home-status-desc {
+      display: block;
+      margin-top: 6px;
+      font-size: 12.5px;
+    }
+
+    /* 异常态把图标块换成正红浅底，扫一眼就能看出是哪一层出了问题 */
+    &.is-error .home-status-icon {
+      background: #fff1f0;
+      color: #c25450; /* = colorError */
+    }
+  }
+
+  .home-next {
+    margin-top: 16px;
+
+    .home-note {
+      margin-bottom: 0;
+      font-size: 12.5px;
+    }
+  }
+
+  .home-steps {
+    margin: 0;
+    padding-inline-start: 20px;
+    color: rgba(31, 39, 51, 0.72);
+    line-height: 2;
+  }
+}

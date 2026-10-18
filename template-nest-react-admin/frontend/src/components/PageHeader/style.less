@@ -1,0 +1,27 @@
+/* 页面顶部：标题 + 说明 + 右侧操作区。页面一律复用 PageHeader，不自己拼。 */
+.page-header {
+  margin-bottom: 24px;
+
+  /* 选择器一律嵌在 `.page-header` 下：单类选择器与 antd 的 `.ant-typography` 是同一个
+     特异性（0,1,0），谁赢取决于样式注入顺序。加一层根类把特异性提到 (0,2,0)。 */
+  .page-header-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .page-header-title {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: -0.015em;
+  }
+
+  .page-header-extra {
+    margin-inline-start: auto;
+  }
+
+  .page-header-sub {
+    font-size: 13px;
+  }
+}

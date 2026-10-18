@@ -1,0 +1,57 @@
+/* 登录页的卡片、品牌区与页脚。页面背景（.auth-wrap）在 layouts/AuthLayout/style.less。
+   ⚠️ 阴影与次级字色是字面值：它们对应 antd 的 boxShadowSecondary 与 colorTextTertiary，
+   而 antd v6 没开 CSS 变量模式，token 在 .less 里取不到。换主题时这里一起改。 */
+.login-card {
+  width: 405px;
+  max-width: calc(100vw - 32px);
+  box-shadow:
+    0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05);
+
+  .login-brand {
+    margin-bottom: 32px;
+
+    .login-logo {
+      margin-bottom: 12px;
+    }
+
+    .login-name {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .login-sub {
+      font-size: 13px;
+      color: rgba(31, 39, 51, 0.45); /* = token.colorTextTertiary */
+      margin-top: 4px;
+    }
+  }
+
+  .login-alert {
+    margin-bottom: 16px;
+  }
+
+  /* 验证码格：44×52 + 22px 等宽。antd 的 Input.OTP 没有尺寸入口，只能从内部类名下手。 */
+  .otp-lg {
+    .ant-otp {
+      gap: 10px;
+    }
+
+    .ant-otp .ant-input {
+      width: 44px;
+      height: 52px;
+      font-size: 22px;
+      font-weight: 600;
+      font-family: var(--mono);
+    }
+  }
+
+  .login-footer {
+    display: block;
+    margin-top: 24px;
+    font-size: 12px;
+    text-align: center;
+  }
+}

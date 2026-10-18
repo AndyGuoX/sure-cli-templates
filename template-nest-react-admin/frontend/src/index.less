@@ -1,0 +1,25 @@
+/* 全局样式地基。必须最先引入 —— antd 的 reset 要盖在浏览器默认样式上。
+   antd v6 是 CSS-in-JS，只负责组件自身，不附带全局 reset：少了这一行，
+   body 的浏览器默认 margin: 8px 会一直在。 */
+@import 'antd/dist/reset.css';
+
+#root {
+  height: 100%;
+}
+
+:root {
+  /* 需要逐字核对的字符串（邮箱、时间戳、验证码）走等宽字体 */
+  --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, 'Courier New', monospace;
+}
+
+/* `<img>` 默认是基线对齐的 inline 元素，底下会多出一条缝 */
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* 公共工具类：只收跨页面复用的小件，页面专属样式回到各自的 style.less */
+.mono {
+  font-family: var(--mono);
+  font-size: 12.5px;
+}

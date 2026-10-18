@@ -1,0 +1,25 @@
+# 本地开发用的 PostgreSQL。生产编排不在这里（见 deploy/docker-compose.yml）。
+# ⚠️ 显式写项目名：compose 的默认项目名是目录名（本仓库根目录叫什么都可能），
+#    和另一个项目的 compose 撞名会互相删容器。
+name: nest-react-admin-dev
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: nest-react-admin-dev-postgres
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+volumes:
+  pgdata:

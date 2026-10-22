@@ -9,9 +9,7 @@ services:
       POSTGRES_DB: app
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
-    # 宿主 5433：5432 上常驻着开发机其他项目的 postgres。dev.mjs 只探端口通不通，
-    # 撞上别人的库会连进去，然后在迁移时报 "database app does not exist"。
-    ports: ["5433:5432"]
+    ports: ["5432:5432"]
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

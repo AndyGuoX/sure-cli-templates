@@ -6,7 +6,7 @@
  *
  * 前端不在这里启动 —— 依赖会顺手装好，另开终端执行：cd frontend && npm run dev
  *
- * 数据库：默认连 `backend/.env` 的 `DATABASE_URL`（模板值是 localhost:5433）。
+ * 数据库：默认连 `backend/.env` 的 `DATABASE_URL`（模板值是 localhost:5432）。
  * 连不上时会尝试 `docker compose -f compose.dev.yml up -d` 起本地 postgres；
  * 没有 docker 就直接报错并给出手动启动的提示。
  *
@@ -37,7 +37,7 @@ function envTemplate() {
     ['PORT', String(API_PORT)],
     ['APP_NAME', 'Nest React Admin'],
     // 与 compose.dev.yml 的 POSTGRES_* 对齐
-    ['DATABASE_URL', 'postgresql://app:app@localhost:5433/app'],
+    ['DATABASE_URL', 'postgresql://app:app@localhost:5432/app'],
     // JWT 签名密钥**现场生成**：写成模块常量就等于所有机器共用同一个密钥
     ['JWT_SECRET', randomBytes(48).toString('base64')],
     ['COOKIE_SECURE', 'false'],
@@ -133,15 +133,15 @@ function portInUse(port, host = '127.0.0.1') {
 
 /** 从 DATABASE_URL 里取 host / port。 */
 function databaseTarget() {
-  const raw = (valueFromEnvFile('DATABASE_URL') ?? 'postgresql://app:app@localhost:5433/app').replace(
+  const raw = (valueFromEnvFile('DATABASE_URL') ?? 'postgresql://app:app@localhost:5432/app').replace(
     /^postgres(ql)?:\/\//,
     'http://',
   );
   try {
     const url = new URL(raw);
-    return { host: url.hostname, port: Number(url.port || 5433) };
+    return { host: url.hostname, port: Number(url.port || 5432) };
   } catch {
-    return { host: 'localhost', port: 5433 };
+    return { host: 'localhost', port: 5432 };
   }
 }
 

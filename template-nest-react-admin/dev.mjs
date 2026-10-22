@@ -6,7 +6,7 @@
  *
  * 前端不在这里启动 —— 依赖会顺手装好，另开终端执行：cd frontend && npm run dev
  *
- * 数据库：默认连 `backend/.env` 的 `DATABASE_URL`（模板值是 localhost:5432）。
+ * 数据库：默认连 `backend/.env` 的 `DATABASE_URL`（模板值是 localhost:5433）。
  * 连不上时会尝试 `docker compose -f compose.dev.yml up -d` 起本地 postgres；
  * 没有 docker 就直接报错并给出手动启动的提示。
  *
@@ -37,7 +37,7 @@ function envTemplate() {
     ['PORT', String(API_PORT)],
     ['APP_NAME', 'Nest React Admin'],
     // 与 compose.dev.yml 的 POSTGRES_* 对齐
-    ['DATABASE_URL', 'postgresql://app:app@localhost:5432/app'],
+    ['DATABASE_URL', 'postgresql://app:app@localhost:5433/app'],
     // JWT 签名密钥**现场生成**：写成模块常量就等于所有机器共用同一个密钥
     ['JWT_SECRET', randomBytes(48).toString('base64')],
     ['COOKIE_SECURE', 'false'],
@@ -133,15 +133,15 @@ function portInUse(port, host = '127.0.0.1') {
 
 /** 从 DATABASE_URL 里取 host / port。 */
 function databaseTarget() {
-  const raw = (valueFromEnvFile('DATABASE_URL') ?? 'postgresql://app:app@localhost:5432/app').replace(
+  const raw = (valueFromEnvFile('DATABASE_URL') ?? 'postgresql://app:app@localhost:5433/app').replace(
     /^postgres(ql)?:\/\//,
     'http://',
   );
   try {
     const url = new URL(raw);
-    return { host: url.hostname, port: Number(url.port || 5432) };
+    return { host: url.hostname, port: Number(url.port || 5433) };
   } catch {
-    return { host: 'localhost', port: 5432 };
+    return { host: 'localhost', port: 5433 };
   }
 }
 
@@ -165,19 +165,25 @@ async function waitForPort(host, port, timeoutMs) {
 /** 确保 PostgreSQL 在跑；本机没有 docker 时给出可执行的提示。 */
 async function ensureDatabase() {
   const { host, port } = databaseTarget();
-  if (await portInUse(port, host)) return;
+  if (await portInUse(port, host)) {
+    // 端口通不代表是本项目的库：别的 postgres 也监听同一端口时，迁移会跑进别人的库。
+    console.log(`PostgreSQL ${host}:${port} 已有实例，直接复用 —— 确认它是本项目的库`);
+    return;
+  }
 
   console.log(`PostgreSQL ${host}:${port} 没在跑，尝试用 docker compose 起本地实例…`);
   const compose = spawnSync(
     'docker',
-    ['compose', '-f', join(ROOT, 'compose.dev.yml'), 'up', '-d'],
+    // --wait：等 healthcheck（pg_isready）通过再返回。只探端口不够 ——
+    // docker 的端口映射在 postgres 初始化完成前就已经开放，迁移会踩到半启动的实例。
+    ['compose', '-f', join(ROOT, 'compose.dev.yml'), 'up', '-d', '--wait'],
     { stdio: 'inherit', shell: false },
   );
   if (compose.error || compose.status !== 0) {
     die(
       `数据库连不上，docker 也没能启动它。\n` +
         `请手动起一个 PostgreSQL，或在有 docker 的机器上执行：\n` +
-        `  docker compose -f compose.dev.yml up -d\n` +
+        `  docker compose -f compose.dev.yml up -d --wait\n` +
         `然后确认 backend/.env 的 DATABASE_URL 指向它。`,
     );
   }

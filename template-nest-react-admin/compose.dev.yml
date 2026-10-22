@@ -1,17 +1,17 @@
 # 本地开发用的 PostgreSQL。生产编排不在这里（见 deploy/docker-compose.yml）。
-# ⚠️ 显式写项目名：compose 的默认项目名是目录名（本仓库根目录叫什么都可能），
-#    和另一个项目的 compose 撞名会互相删容器。
-name: nest-react-admin-dev
+# 不写 name / container_name：让 compose 按目录名生成。
+# 硬编码会把同一模板生成的所有项目并成同一个项目，共用容器和数据卷。
 
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: nest-react-admin-dev-postgres
     environment:
       POSTGRES_DB: app
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
-    ports: ["5432:5432"]
+    # 宿主 5433：5432 上常驻着开发机其他项目的 postgres。dev.mjs 只探端口通不通，
+    # 撞上别人的库会连进去，然后在迁移时报 "database app does not exist"。
+    ports: ["5433:5432"]
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
